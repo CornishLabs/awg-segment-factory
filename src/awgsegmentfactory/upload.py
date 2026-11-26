@@ -92,7 +92,7 @@ def _segment_count_pow2(n: int) -> int:
     p = 1
     while p < n_int:
         p <<= 1
-    return p
+    return max(2, p)
 
 
 def _ensure_numpy_repo(repo: QIRtoSamplesSegmentCompiler) -> QIRtoSamplesSegmentCompiler:
@@ -270,6 +270,13 @@ def _full_cpu_upload(
         s = sequence.add_segment(segment_lengths[idx])
         s[:, :] = data_i16
         segments_hw.append(s)
+
+    if len(compiled_segments) == 1:
+        # Some Spectrum cards reject SPC_SEQMODE_MAXSEGMENTS=1. The spcm
+        # Sequence helper derives that register from its segment list, so add
+        # one unused padding segment while keeping the compiled program one-step.
+        pad = sequence.add_segment(segment_lengths[0])
+        pad[:, :] = 0
 
     if not repo.steps:
         raise ValueError("Cannot upload: compiled program has no steps")

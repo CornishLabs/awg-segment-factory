@@ -6,6 +6,7 @@ import numpy as np
 from awgsegmentfactory.upload import (
     CPUUploadSession,
     SCAPPUploadSession,
+    _segment_count_pow2,
     upload_sequence_program,
 )
 
@@ -82,6 +83,11 @@ class _FakeRepo:
 
 
 class TestUploadAPI(unittest.TestCase):
+    def test_sequence_segment_count_has_hardware_minimum_two(self) -> None:
+        self.assertEqual(_segment_count_pow2(1), 2)
+        self.assertEqual(_segment_count_pow2(2), 2)
+        self.assertEqual(_segment_count_pow2(3), 4)
+
     def test_auto_mode_routes_numpy_to_cpu(self) -> None:
         repo = _FakeRepo(
             compiled_segments=(
@@ -201,4 +207,3 @@ class TestUploadAPI(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
